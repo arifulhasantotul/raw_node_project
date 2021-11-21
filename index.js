@@ -7,6 +7,8 @@
 
 // Dependencies
 const http = require("http");
+const url = require("url");
+const { StringDecoder } = require("string_decoder");
 
 // app object - module scaffolding
 const app = {};
@@ -26,8 +28,27 @@ app.createServer = () => {
 
 // handle request response
 app.handleReqRes = (req, res) => {
-   // response handle
-   res.end("Hello world");
+   // request handle
+   // get the url an parse it
+   const parsedUrl = url.parse(req.url, true);
+   const path = parsedUrl.pathname;
+   // using RegEX to remove slash(/) from start and from end
+   const trimmedPath = path.replace(/^\/+|\/+$/g, "");
+   const method = req.method.toLowerCase();
+   const queryStringObject = parsedUrl.query;
+   const headers = req.headers;
+
+   const decoder = new StringDecoder("utf-8");
+   let readData = ``;
+   req.on("data", (buffer) => {
+      readData += decoder.write(buffer);
+   });
+   req.on("end", () => {
+      readData += decoder.end();
+      console.log(readData);
+      // response handle
+      res.end("Hello bro");
+   });
 };
 
 // start the server
