@@ -15,14 +15,9 @@ const data = require("./lib/data");
 const app = {};
 
 // @TODO pore muche dibo
-data.update(
-   "test",
-   "newFile",
-   { name: "England", language: "English" },
-   (err) => {
-      console.log(err);
-   }
-);
+data.delete("test", "newFile", (err) => {
+   console.log(err);
+});
 
 // create server
 app.createServer = () => {
