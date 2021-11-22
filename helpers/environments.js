@@ -23,16 +23,12 @@ environments.staging = {
 const currentEnvironment =
    typeof process.env.NODE_ENV === "string" ? process.env.NODE_ENV : "staging";
 
-// console.log(currentEnvironment);
+console.log(currentEnvironment);
 // export corresponding environment object
 const environmentToExport =
-   typeof environments[currentEnvironment] === "object"
-      ? environments[currentEnvironment]
-      : environments.staging;
-
-// console.log(environments);
-// console.log(environments[currentEnvironment]);
-// console.log(environmentToExport);
+   currentEnvironment === "staging"
+      ? environments.staging
+      : environments.production;
 
 // export module
 module.exports = environmentToExport;
