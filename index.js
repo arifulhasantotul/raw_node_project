@@ -15,17 +15,9 @@ const data = require("./lib/data");
 const app = {};
 
 // @TODO pore muche dibo
-data.create(
-   "test",
-   "newFile",
-   {
-      name: "Bangladesh",
-      language: "Bengali",
-   },
-   (err) => {
-      console.log(`error was`, err);
-   }
-);
+data.read("test", "newFile", (err, data) => {
+   console.log(err + " " + data);
+});
 
 // create server
 app.createServer = () => {
