@@ -19,15 +19,15 @@ const handler = {};
 handler.tokenHandler = (requestProperties, callback) => {
    const acceptedMethods = ["get", "post", "put", "delete"];
    if (acceptedMethods.indexOf(requestProperties.method) > -1) {
-      handler.token[requestProperties.method](requestProperties, callback);
+      handler._token[requestProperties.method](requestProperties, callback);
    } else {
       callback(405);
    }
 };
 
-handler.token = {};
+handler._token = {};
 
-handler.token.get = (requestProperties, callback) => {
+handler._token.get = (requestProperties, callback) => {
    // check the id if valid
    const id =
       typeof requestProperties.queryStringObject.id === "string" &&
@@ -53,7 +53,7 @@ handler.token.get = (requestProperties, callback) => {
       });
    }
 };
-handler.token.post = (requestProperties, callback) => {
+handler._token.post = (requestProperties, callback) => {
    const phone =
       typeof requestProperties.body.phone === "string" &&
       requestProperties.body.phone.trim().length === 11
@@ -100,7 +100,7 @@ handler.token.post = (requestProperties, callback) => {
    }
 };
 // @TODO: Authentication
-handler.token.put = (requestProperties, callback) => {
+handler._token.put = (requestProperties, callback) => {
    const id =
       typeof requestProperties.body.id === "string" &&
       requestProperties.body.id.trim().length === 20
@@ -142,7 +142,7 @@ handler.token.put = (requestProperties, callback) => {
    }
 };
 // @TODO: Authentication
-handler.token.delete = (requestProperties, callback) => {
+handler._token.delete = (requestProperties, callback) => {
    // check the phone number if valid
    const id =
       typeof requestProperties.queryStringObject.id === "string" &&
@@ -175,5 +175,22 @@ handler.token.delete = (requestProperties, callback) => {
          error: "There was a problem in your result!",
       });
    }
+};
+
+handler._token.verify = (id, phone, callback) => {
+   data.read("tokens", id, (err1, tokenData) => {
+      if (!err1 && tokenData) {
+         if (
+            parseJSON(tokenData).phone === phone &&
+            parseJSON(tokenData).expires > Date.now()
+         ) {
+            callback(true);
+         } else {
+            callback(false);
+         }
+      } else {
+         callback(false);
+      }
+   });
 };
 module.exports = handler;
