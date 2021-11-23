@@ -162,42 +162,55 @@ handler._users.put = (requestProperties, callback) => {
    if (phone) {
       if (firstName || lastName || password) {
          // console.log(phone, firstName, lastName);
-         // lookup the user
-         data.read("users", phone, (err1, uData) => {
-            // console.log(uData);
-            const userData = { ...parseJSON(uData) };
+         // verify token
+         const token =
+            typeof requestProperties.headersObject.token === "string"
+               ? requestProperties.headersObject.token
+               : false;
 
-            console.log(userData);
-            if (!err1 && userData) {
-               if (firstName) {
-                  userData.firstName = firstName;
-                  console.log(userData.firstName);
-               }
-               if (lastName) {
-                  userData.lastName = lastName;
-               }
-               if (password) {
-                  userData.password = hash(password);
-                  // password = userData.password;
-               }
+         tokenHandler._token.verify(token, phone, (tokenId) => {
+            if (tokenId) {
+               // lookup the user
+               data.read("users", phone, (err1, uData) => {
+                  // console.log(uData);
+                  const userData = { ...parseJSON(uData) };
 
-               // store to database
-               data.update("users", phone, userData, (err2) => {
-                  if (!err2) {
-                     callback(200, {
-                        message: "User updated successfully",
+                  console.log(userData);
+                  if (!err1 && userData) {
+                     if (firstName) {
+                        userData.firstName = firstName;
+                        console.log(userData.firstName);
+                     }
+                     if (lastName) {
+                        userData.lastName = lastName;
+                     }
+                     if (password) {
+                        userData.password = hash(password);
+                        // password = userData.password;
+                     }
+
+                     // store to database
+                     data.update("users", phone, userData, (err2) => {
+                        if (!err2) {
+                           callback(200, {
+                              message: "User updated successfully",
+                           });
+                        } else {
+                           callback(500, {
+                              error: "There was a problem in the server side",
+                           });
+                        }
                      });
                   } else {
-                     callback(500, {
-                        error: "There was a problem in the server side",
+                     callback(400, {
+                        error: "You have a problem in your user data!",
                      });
                   }
                });
             } else {
-               callback(400, {
-                  error: "You have a problem in your user data!",
+               callback(403, {
+                  error: "Authentication failed",
                });
-               // can not solve error
             }
          });
       } else {
