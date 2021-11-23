@@ -12,6 +12,7 @@ const routes = require("../routes");
 const {
    notFoundHandler,
 } = require("../handlers/routeHandlers/notFoundHandler");
+const { parseJSON } = require("../helpers/utilities");
 
 // app object - module scaffolding
 const handler = {};
@@ -49,6 +50,9 @@ handler.handleReqRes = (req, res) => {
    req.on("end", () => {
       realData += decoder.end();
 
+      // adding body property to requestProperties object
+      requestProperties.body = parseJSON(realData);
+
       chosenHandler(requestProperties, (statusCode, payLoad) => {
          statusCode = typeof statusCode === "number" ? statusCode : 500;
          payLoad = typeof payLoad === "object" ? payLoad : {};
@@ -56,11 +60,10 @@ handler.handleReqRes = (req, res) => {
          const payLoadString = JSON.stringify(payLoad);
 
          // return the final response
+         res.setHeader("Content-type", "application/json");
          res.writeHead(statusCode);
          res.end(payLoadString);
       });
-      // response handle
-      res.end("Hello bro");
    });
 };
 
