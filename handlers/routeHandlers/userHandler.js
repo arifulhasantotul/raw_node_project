@@ -7,7 +7,7 @@
 
 // dependencies
 const data = require("../../lib/data");
-const { hash } = require("../../helpers/utilities");
+const { hash, parseJSON } = require("../../helpers/utilities");
 
 // module scaffolding
 const handler = {};
@@ -24,7 +24,31 @@ handler.userHandler = (requestProperties, callback) => {
 handler._users = {};
 
 handler._users.get = (requestProperties, callback) => {
-   callback(200);
+   // check the phone number if valid
+   const phone =
+      typeof requestProperties.queryStringObject.phone === "string" &&
+      requestProperties.queryStringObject.phone.trim().length === 11
+         ? requestProperties.queryStringObject.phone
+         : false;
+
+   if (phone) {
+      // lookup the user
+      data.read("users", phone, (err, userData) => {
+         const user = { ...parseJSON(userData) };
+         if (!err && user) {
+            delete user.password;
+            callback(200, user);
+         } else {
+            callback(404, {
+               message: "Requested user was not found",
+            });
+         }
+      });
+   } else {
+      callback(404, {
+         message: "Requested user was not found",
+      });
+   }
 };
 handler._users.post = (requestProperties, callback) => {
    const firstName =
@@ -84,7 +108,7 @@ handler._users.post = (requestProperties, callback) => {
             });
          } else {
             callback(500, {
-               error: "There was a problem is server side",
+               error: "There is a problem in server side",
             });
          }
       });
