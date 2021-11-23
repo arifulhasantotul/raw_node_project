@@ -27,8 +27,32 @@ handler.tokenHandler = (requestProperties, callback) => {
 
 handler.token = {};
 
-// @TODO: Authentication
-handler.token.get = (requestProperties, callback) => {};
+handler.token.get = (requestProperties, callback) => {
+   // check the id if valid
+   const id =
+      typeof requestProperties.queryStringObject.id === "string" &&
+      requestProperties.queryStringObject.id.trim().length === 20
+         ? requestProperties.queryStringObject.id
+         : false;
+
+   if (id) {
+      // lookup the user
+      data.read("tokens", id, (err, tokenData) => {
+         const token = { ...parseJSON(tokenData) };
+         if (!err && token) {
+            callback(200, token);
+         } else {
+            callback(404, {
+               message: "Requested token was not found",
+            });
+         }
+      });
+   } else {
+      callback(404, {
+         message: "Requested token was not found",
+      });
+   }
+};
 handler.token.post = (requestProperties, callback) => {
    const phone =
       typeof requestProperties.body.phone === "string" &&
