@@ -232,23 +232,37 @@ handler._users.delete = (requestProperties, callback) => {
          ? requestProperties.queryStringObject.phone
          : false;
    if (phone) {
-      // lookup the user
-      data.read("users", phone, (err, userData) => {
-         if (!err && userData) {
-            data.delete("users", phone, (err1) => {
-               if (!err1) {
-                  callback(200, {
-                     message: "User deleted successfully",
+      // verify token
+      const token =
+         typeof requestProperties.headersObject.token === "string"
+            ? requestProperties.headersObject.token
+            : false;
+
+      tokenHandler._token.verify(token, phone, (tokenId) => {
+         if (tokenId) {
+            // lookup the user
+            data.read("users", phone, (err, userData) => {
+               if (!err && userData) {
+                  data.delete("users", phone, (err1) => {
+                     if (!err1) {
+                        callback(200, {
+                           message: "User deleted successfully",
+                        });
+                     } else {
+                        callback(500, {
+                           message: "There was a server side error",
+                        });
+                     }
                   });
                } else {
                   callback(500, {
-                     message: "There was a server side error",
+                     error: "There was a server side error!",
                   });
                }
             });
          } else {
-            callback(500, {
-               error: "There was a server side error!",
+            callback(403, {
+               error: "Authentication failed",
             });
          }
       });
