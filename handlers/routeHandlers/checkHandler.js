@@ -26,7 +26,48 @@ handler.checkHandler = (requestProperties, callback) => {
 handler._check = {};
 
 // get check
-handler._check.get = (requestProperties, callback) => {};
+handler._check.get = (requestProperties, callback) => {
+   // check the id if valid
+   const id =
+      typeof requestProperties.queryStringObject.id === "string" &&
+      requestProperties.queryStringObject.id.trim().length === 20
+         ? requestProperties.queryStringObject.id
+         : false;
+
+   if (id) {
+      // lookup the check
+      data.read("checks", id, (err1, checkData) => {
+         if (!err1 && checkData) {
+            // verify token
+            const token =
+               typeof requestProperties.headersObject.token === "string"
+                  ? requestProperties.headersObject.token
+                  : false;
+            tokenHandler._token.verify(
+               token,
+               parseJSON(checkData).userPhone,
+               (tokenIsValid) => {
+                  if (tokenIsValid) {
+                     callback(200, parseJSON(checkData));
+                  } else {
+                     callback(403, {
+                        error: "Authentication failed",
+                     });
+                  }
+               }
+            );
+         } else {
+            callback(500, {
+               error: "You have a problem in your request",
+            });
+         }
+      });
+   } else {
+      callback(400, {
+         error: "You have a problem in your request",
+      });
+   }
+};
 
 // post check
 handler._check.post = (requestProperties, callback) => {
