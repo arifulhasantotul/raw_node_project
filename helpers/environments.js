@@ -9,18 +9,29 @@
 
 // module scaffolding
 const environments = {};
+require("dotenv").config();
 
 environments.staging = {
    port: 3000,
    envName: "staging",
    secretKey: "asdfsa",
    maxChecks: 5,
+   twilio: {
+      fromPhone: "+14155552671",
+      accountSid: process.env.accountSid,
+      authToken: process.env.authToken,
+   },
 };
 environments.production = {
    port: 5000,
    envName: "production",
    secretKey: "ljljljji",
    maxChecks: 5,
+   twilio: {
+      fromPhone: "+14155552671",
+      accountSid: process.env.accountSid,
+      authToken: process.env.authToken,
+   },
 };
 
 // determine which environment was passed
@@ -30,14 +41,14 @@ const currentEnvironment =
 // export corresponding environment object
 console.log(currentEnvironment);
 console.log(typeof environments?.currentEnvironment);
-const environmentToExport =
-   currentEnvironment === "staging"
-      ? environments.staging
-      : environments.production;
 // const environmentToExport =
-//    typeof environments[currentEnvironment] === "object"
-//       ? environments[currentEnvironment]
+//    currentEnvironment === "staging"
+//       ? environments.staging
 //       : environments.production;
+const environmentToExport =
+   typeof environments[currentEnvironment] === "object"
+      ? environments[currentEnvironment]
+      : environments.staging;
 
 console.log(environmentToExport);
 // export module
